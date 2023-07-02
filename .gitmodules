@@ -1,0 +1,3 @@
+[submodule "UI/OsuPage"]
+	path = UI/OsuPage
+	url = https://github.com/carsonKompon/rhythm4k-osupage
