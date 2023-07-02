@@ -42,6 +42,7 @@ public partial class GamePage
     public virtual string DownInput => "DownArrow";
     public virtual string UpInput => "UpArrow";
     public virtual string RightInput => "RightArrow";
+    public virtual bool ColouredArrows => true;
 
     private float ScreenTime
     {
@@ -121,14 +122,14 @@ public partial class GamePage
                     }
                     Lane lane = Lanes[note.Lane];
                     Arrow arrow = lane.AddChild<Arrow>();
-                    arrow.SetNote(note);
+                    arrow.SetNote(note, ColouredArrows);
                     Arrows.Add(arrow);
                     note.Arrow = arrow;
 
                     if(note.Length > 0f)
                     {
                         Trail trail = lane.AddChild<Trail>();
-                        trail.SetNote(note);
+                        trail.SetNote(note, ColouredArrows);
                         Trails.Add(trail);
                     }
                     LivingNotes.Add(note);
@@ -202,7 +203,7 @@ public partial class GamePage
                             else
                             {
                                 trail.Style.Top = Length.Percent(downscrollPos);
-                                trail.Style.Height = Length.Percent(lengthPercent);
+                                trail.Style.Height = Length.Percent(lengthPercent - 6f);
                             }
                         }
                         else
@@ -282,7 +283,7 @@ public partial class GamePage
                 if(arrow != null)
                 {
                     Receptor receptor = Lanes[note.Lane].Receptor;
-                    receptor.Glow(arrow);
+                    receptor.Glow(arrow, ColouredArrows);
 
                     Arrows.Remove(arrow);
                     arrow.Delete();
