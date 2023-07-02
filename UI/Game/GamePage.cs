@@ -198,12 +198,12 @@ public partial class GamePage
                             if(downscrollPos <= 0f && lengthPercent >= 100f)
                             {
                                 trail.Style.Top = Length.Percent(0f);
-                                trail.Style.Height = Length.Percent(100f-positionPercent+6f);
+                                trail.Style.Height = Length.Percent(100f-positionPercent);
                             }
                             else
                             {
                                 trail.Style.Top = Length.Percent(downscrollPos);
-                                trail.Style.Height = Length.Percent(lengthPercent - 6f);
+                                trail.Style.Height = Length.Percent(lengthPercent);
                             }
                         }
                         else
