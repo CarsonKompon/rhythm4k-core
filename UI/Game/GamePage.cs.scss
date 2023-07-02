@@ -1,4 +1,4 @@
-GamePage
+.game-container
 {
     font-family: Poppins;
     text-shadow: 2px 2px black;
@@ -143,12 +143,12 @@ GamePage
 {
     position: absolute;
     left: 50%;
+    transform: translateX(-50%);
     background-color: black;
     border-left: 4px solid white;
     border-right: 4px solid white;
     width: 600px;
     height: 100%;
-    transform: translateX(-50%, 0%);
 
     .lane-container
     {
@@ -175,10 +175,25 @@ GamePage
                 width: 142px;
                 height: 142px;
                 transition: transform 0.02s ease-in;
+               
 
                 &.pressing
                 {
-                    transform: translate(-23% 0%) scale(0.9);
+                    .receptor-arrow
+                    {
+                        width: 90%;
+                        height: 90%;
+                        left: 5%;
+                        top: 5%;
+                    }
+
+                    .receptor-glow
+                    {
+                        width: 135%;
+                        height: 135%;
+                        left: -18%;
+                        top: -18%;
+                    }
                 }
 
                 .receptor-arrow
@@ -187,6 +202,7 @@ GamePage
                     width: 100%;
                     height: 100%;
                     background-size: contain;
+                    transition: all 0.02s ease-in;
 
                     &.lane-0
                     {
@@ -219,7 +235,7 @@ GamePage
                     top: -26%;
                     background-size: contain;
                     opacity: 0;
-                    transition: opacity 0.05s ease-in;
+                    transition: all 0.02s ease-in;
 
                     &.show
                     {

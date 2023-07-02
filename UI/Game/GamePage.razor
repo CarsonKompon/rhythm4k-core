@@ -7,7 +7,7 @@
 
 @namespace Rhythm4K
 
-<root>
+<root class="game-container">
 
     <!-- Holds the Cover Art, Song Info, and Progress -->
     <div class="song-info">
@@ -129,7 +129,7 @@
             LoadSong();
         }
 
-        if(Cookie.Get<bool>("rhythm4k.downscroll", false))
+        if(Downscroll)
         {
             LaneContainer.Style.Top = Length.Pixels(-100f);  
             foreach(Lane lane in Lanes)
@@ -143,7 +143,7 @@
             LaneContainer.Style.Top = Length.Pixels(0f);
             foreach(Lane lane in Lanes)
             {
-                lane.Style.Top = Length.Pixels(0f);
+                lane.Style.Top = Length.Pixels(85f);
             }
         }
     }

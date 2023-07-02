@@ -181,7 +181,11 @@ SongSelectPage
                 height: 400px;
                 align-items: center;
                 color: white;
-                flex-shrink: 0;
+                
+                .song-info
+                {
+                    flex-shrink: 0;
+                }
             }
 
             .difficulties

@@ -18,10 +18,13 @@
 {
     void OnPackageSelected(Package package)
     {
+        Log.Info("Selected package: " + package.Title);
+
         if(Ancestors.FirstOrDefault(x => x is Rhythm4KMenu) is Rhythm4KMenu menu)
         {
             if(menu.Descendants.FirstOrDefault(x => x is SongSelectPage) is SongSelectPage ss)
             {
+                Log.Info("Mounting addon");
                 ss.MountAddon(package);
             }
         }
