@@ -409,8 +409,9 @@ public partial class GamePage
 
     public void FinishedSong()
     {
-        IsPlaying = false;
-        this.Navigate("/songs");
+		if ( MusicStream is not null ) MusicStream.Stop();
+		IsPlaying = false;
+		this.Navigate("/songs");
     }
 
     public List<Note> GetNotesToHit()

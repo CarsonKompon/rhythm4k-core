@@ -14,13 +14,15 @@ public struct Song
     public float SampleLength { get; set; }
     public float BPM { get; set; }
     public List<Chart> Charts { get; set; }
+	
+	public string AudioFilename;
 }
 
 public class Chart
 {
     public string Name { get; set; }
     public string Charter { get; set; }
-    public int Difficulty { get; set; }
+    public float Difficulty { get; set; }
     public string DifficultyName { get; set; }
     public List<BpmChange> BpmChanges { get; set; }
     public List<Note> Notes { get; set; }

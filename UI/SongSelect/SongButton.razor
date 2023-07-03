@@ -18,7 +18,15 @@
     }
     else
     {
-        <img class="cover" src=@FindBackgroundImage() />
+        <span class="cover">
+			<img src=@FindBackgroundImage() />
+			@if(Song.Song.AudioFilename.EndsWith(".mp3"))
+			{
+				<span class="not-supported">
+					Cannot load charts that utilize MP3 files at the moment.
+				</span>
+			}
+		</span>
         <div class="song-info">
             <h1>@Song.Song.Name</h1>
             <h2>@Song.Song.Artist</h2>
@@ -29,11 +37,15 @@
 @code
 {
 
-    public Rhythm4KSong Song { get; set; }
+	public Rhythm4KSong Song { get; set; }
 
+	string FindBackgroundImage()
+	{
+		return Song.CoverArt;
+	}
 
-    string FindBackgroundImage()
-    {
-        return Song.CoverArt;
-    }
+	protected override int BuildHash()
+	{
+		return HashCode.Combine(Song?.CoverArt ?? null);
+	}
 }

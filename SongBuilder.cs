@@ -2,12 +2,13 @@ using System.Text.RegularExpressions;
 using System.Net.Mime;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Sandbox;
 
 namespace Rhythm4K;
 
 public static class SongBuilder
-{
+{	
     public static Song Load(string file)
     {
 	    // if you setup file incorrectly (like i did it myself)
@@ -47,6 +48,43 @@ public static class SongBuilder
 
         return song;
     }
+
+	// Osu Folder Loading
+	public static async Task LoadFromOsuFolder(string fullId, string thumb = "")
+	{
+		string path = "beatmaps/" + fullId + "/";
+		foreach(var file in FileSystem.Data.FindFile("beatmaps/" + fullId, "*.osu"))
+		{
+			if ( file.Trim().EndsWith( "-0.osu" ) )
+			{
+				path += file;
+				break;
+			}
+		}
+
+		var r4kSong = new Rhythm4KSong();
+		r4kSong.ChartPath = fullId;
+		r4kSong.CoverArt = thumb;
+		r4kSong.Song = LoadFromOSU( path, false );
+		r4kSong.OsuId = fullId;
+
+		//r4kSong.SoundStream.WriteData( await soundFile.GetSamplesAsync() );
+
+		Rhythm4KSong.AllExtras.Add( r4kSong );
+
+		// Calculate baked values
+		for ( int i = 0; i < r4kSong.Song.Charts.Count; i++ )
+		{
+			r4kSong.Song.Charts[i].BakeValues();
+		}
+
+		string coverPath = "beatmaps/" + fullId + "/cover-image.txt";
+		if ( FileSystem.Data.FileExists( coverPath ) )
+		{
+			r4kSong.CoverArt = await FileSystem.Data.ReadAllTextAsync( coverPath );
+			Log.Info( "Cover art: " + r4kSong.CoverArt );
+		}
+	}
 
     // Stepmania Chart Loading
     public static Song LoadFromSM(string file)
@@ -130,7 +168,7 @@ public static class SongBuilder
                     chart.Notes = new List<Note>();
                     chart.BpmChanges = bpmChanges;
                     chart.Name = noteSplit[3].Trim().Replace(":", "");
-                    chart.Difficulty = int.Parse(noteSplit[4].Trim().Replace(":", ""));
+                    chart.Difficulty = float.Parse(noteSplit[4].Trim().Replace(":", ""));
                     chart.DifficultyName = noteSplit[3].Trim().Replace(":", "");
                     chart.Charter = charterName;
 
@@ -190,21 +228,21 @@ public static class SongBuilder
         return song;
     }
 
-    public static Song LoadFromOSU(string rootFile)
+    public static Song LoadFromOSU(string rootFile, bool mounted = true)
     {
         if(!rootFile.EndsWith(".osu")) return new Song();
 
-        Song song = new Song();
-        song.Charts = new List<Chart>();
+		var fs = mounted ? FileSystem.Mounted : FileSystem.Data;
+		Song song = new Song();
         song.Charts = new List<Chart>();
         string charterName = "";
 
-        List<string> files = new();
+		List<string> files = new();
         files.Add(rootFile);
         if(rootFile.EndsWith("-0.osu"))
         {
             int i = 1;
-            while(FileSystem.Mounted.FileExists(rootFile.Replace("-0.osu", "-" + i + ".osu")))
+            while( fs.FileExists(rootFile.Replace("-0.osu", "-" + i + ".osu")))
             {
                 files.Add(rootFile.Replace("-0.osu", "-" + i + ".osu"));
                 i++;
@@ -213,7 +251,7 @@ public static class SongBuilder
 
         foreach(var file in files)
         {
-            string text = FileSystem.Mounted.ReadAllText(file);
+			string text = fs.ReadAllText(file);
             string[] sections = text.Split('[');
 
             Chart chart = new Chart();
@@ -229,12 +267,16 @@ public static class SongBuilder
                     foreach (var line in lines)
                     {
                         var split = line.Split(':');
-                        if(split.Length < 2) continue;
-                        var key = split[0].Trim();
+						if ( split.Length < 2 ) continue;
+						var key = split[0].Trim();
                         var value = split[1].Trim();
                         switch(key)
                         {
-                            case "PreviewTime":
+							case "AudioFilename":
+								song.AudioFilename = value.ToString();
+								break;
+
+							case "PreviewTime":
                                 song.SampleStart = float.Parse(value);
                                 song.SampleLength = 6f;
                                 break;
@@ -290,7 +332,7 @@ public static class SongBuilder
                         switch(key)
                         {
                             case "OverallDifficulty":
-                                chart.Difficulty = int.Parse(value);
+                                chart.Difficulty = float.Parse(value);
                                 break;
                         }
                     }
@@ -325,7 +367,7 @@ public static class SongBuilder
                         var line = lines[i];
                         var split = line.Split(',');
                         if(split.Length < 6) continue;
-                        var x = int.Parse(split[0]);
+						var x = int.Parse(split[0]);
                         var y = int.Parse(split[1]);
                         float time = float.Parse(split[2]) / 1000f;
                         var type = int.Parse(split[3]);
@@ -344,15 +386,15 @@ public static class SongBuilder
 
                         switch(type)
                         {
-                            case 1:
-                                chart.Notes.Add(new Note(offset, lane, NoteType.Normal));
-                                break;
                             case 128:
                                 var endTime = float.Parse(objectParams.Split(':')[0]) / 1000f;
                                 var endOffset = chart.GetOffsetFromTime(endTime);
-                                var note = new Note(offset, lane, 0, endOffset - offset);
-                                break;
-                        }
+								var note = new Note( offset, lane, 0, endOffset - offset );
+								break;
+							default:
+								chart.Notes.Add( new Note( offset, lane, NoteType.Normal ) );
+								break;
+						}
                     }
                 }
 

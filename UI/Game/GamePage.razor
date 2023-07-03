@@ -73,147 +73,176 @@
 
 @code
 {
-    public static GamePage Current { get; private set; }
-    public Package SongPackage { get; private set; }
-    public Song Song { get; private set; }
-    public Chart Chart { get; private set; }
+	public static GamePage Current { get; private set; }
+	public Package SongPackage { get; private set; }
+	public Song Song { get; private set; }
+	public Chart Chart { get; private set; }
 
-    public Panel CoverArt { get; set; }
-    public Panel ProgressBar { get; set; }
-    public Panel ChainContainer { get; set; }
-    public Panel LaneContainer { get; set; }
-    public Panel MultiplayerContainer { get; set; }
-    public Panel ComboContainer { get; set; }
-    public string SoundName { get; set; }
-    public string CoverArtName { get; set; }
+	public Panel CoverArt { get; set; }
+	public Panel ProgressBar { get; set; }
+	public Panel ChainContainer { get; set; }
+	public Panel LaneContainer { get; set; }
+	public Panel MultiplayerContainer { get; set; }
+	public Panel ComboContainer { get; set; }
+	public string SoundName { get; set; }
+	public MusicStream MusicStream { get; set; }
+	public string CoverArtName { get; set; }
 
 
-    // Game variables
-    public float CurrentBPM = 120f;
-    public float SongLength = 120f;
-    public Sound CurrentSound;
-    public RealTimeSince CurrentTime = 0f;
-    public float LastTime = 0f;
-    public List<Note> Notes = new();
-    public List<Note> LivingNotes = new();
-    public List<Arrow> Arrows = new();
-    public List<Trail> Trails = new();
-    public List<Lane> Lanes = new();
-    public List<BpmChange> BpmChanges = new();
-    public bool IsPlaying = false;
-    public int CritValue = 1;
-    public long Score = 0;
-    public int Combo = 0;
-    public int MaxCombo = 0;
+	// Game variables
+	public float CurrentBPM = 120f;
+	public float SongLength = 120f;
+	public Sound CurrentSound;
+	public RealTimeSince CurrentTime = 0f;
+	public float LastTime = 0f;
+	public List<Note> Notes = new();
+	public List<Note> LivingNotes = new();
+	public List<Arrow> Arrows = new();
+	public List<Trail> Trails = new();
+	public List<Lane> Lanes = new();
+	public List<BpmChange> BpmChanges = new();
+	public bool IsPlaying = false;
+	public int CritValue = 1;
+	public long Score = 0;
+	public int Combo = 0;
+	public int MaxCombo = 0;
 
-    protected override void OnAfterTreeRender(bool firstTime)
-    {
-        base.OnAfterTreeRender(firstTime);
+	protected override void OnAfterTreeRender(bool firstTime)
+	{
+		base.OnAfterTreeRender(firstTime);
 
-        if(LaneContainer.Children.Count() != 4)
-        {
-            // Destroy the current children
-            LaneContainer.DeleteChildren(true);
-            Lanes.Clear();
-            // Create the Lanes
-            for(int i=0; i<4; i++)
-            {
-                Lane lane = LaneContainer.AddChild<Lane>();
-                lane.SetLane(i);
-                Lanes.Add(lane);
-            }
-        }
+		if(LaneContainer.Children.Count() != 4)
+		{
+			// Destroy the current children
+			LaneContainer.DeleteChildren(true);
+			Lanes.Clear();
+			// Create the Lanes
+			for(int i=0; i<4; i++)
+			{
+				Lane lane = LaneContainer.AddChild<Lane>();
+				lane.SetLane(i);
+				Lanes.Add(lane);
+			}
+		}
 
-        if (firstTime)
-        {
-            LoadSong();
-        }
+		if (firstTime)
+		{
+			LoadSong();
+		}
 
-        if(Downscroll)
-        {
-            LaneContainer.Style.Top = Length.Pixels(-100f);  
-            foreach(Lane lane in Lanes)
-            {
-                lane.Style.Top = Length.Pixels(-171f);
-                lane.Receptor.Style.Bottom = Length.Pixels(-171f);
-            }
-        }
-        else
-        {
-            LaneContainer.Style.Top = Length.Pixels(0f);
-            foreach(Lane lane in Lanes)
-            {
-                lane.Style.Top = Length.Pixels(85f);
-            }
-        }
-    }
+		if(Downscroll)
+		{
+			LaneContainer.Style.Top = Length.Pixels(-100f);  
+			foreach(Lane lane in Lanes)
+			{
+				lane.Style.Top = Length.Pixels(-171f);
+				lane.Receptor.Style.Bottom = Length.Pixels(-171f);
+			}
+		}
+		else
+		{
+			LaneContainer.Style.Top = Length.Pixels(0f);
+			foreach(Lane lane in Lanes)
+			{
+				lane.Style.Top = Length.Pixels(85f);
+			}
+		}
+	}
 
-    private void ResetValues()
-    {
-        Score = 0;
-        Combo = 0;
-        MaxCombo = 0;
-        IsPlaying = false;
-        ScreenTime = -1;
+	private void ResetValues()
+	{
+		Score = 0;
+		Combo = 0;
+		MaxCombo = 0;
+		IsPlaying = false;
+		ScreenTime = -1;
 
-        ProgressBar.Style.Width = Length.Percent(0f);
-    }
+		ProgressBar.Style.Width = Length.Percent(0f);
+	}
 
-    public void SetSong(Rhythm4KSong song, int difficulty)
-    {
-        Song = song.Song;
-        Chart = Song.Charts[difficulty];
-        SoundName = song.SoundName;
-        CoverArtName = song.CoverArt;
+	public void SetSong(Rhythm4KSong song, int difficulty)
+	{
+		if(MusicStream is not null)
+		{
+			MusicStream.Stop();
+			MusicStream = null;
+		}
 
-        if(ProgressBar is not null) LoadSong();
-    }
+		Song = song.Song;
+		Chart = Song.Charts[difficulty];
+		SoundName = song.SoundName;
+		CoverArtName = song.CoverArt;
 
-    public void LoadSong()
-    {
-        if(Chart is null)
-        {
-            Log.Warning("Song could not be found!!");
-            return;
-        }
+		if (song.OsuId != "")
+		{
+			string musicPath = "beatmaps/" + song.OsuId + "/" + song.Song.AudioFilename;
+			if (FileSystem.Data.FileExists(musicPath))
+			{
+				MusicStream = new MusicStream(musicPath);
+			}
+		}
 
-        ResetValues();
+		if(ProgressBar is not null) LoadSong();
+	}
 
-        CoverArt.Style.BackgroundImage = Texture.Load(CoverArtName);
+	public void LoadSong()
+	{
+		if(Chart is null)
+		{
+			Log.Warning("Song could not be found!!");
+			return;
+		}
 
-        CurrentBPM = Song.BPM;
-        SongLength = Chart.GetSongLength();
-        CritValue = (int)MathF.Floor(10000000f/Chart.TotalChain);
+		ResetValues();
 
-        foreach(Note note in Chart.Notes)
-        {
-            Notes.Add(note);
-        }
+		CoverArt.Style.BackgroundImage = Texture.Load(CoverArtName);
 
-        foreach(BpmChange bpmchange in Chart.BpmChanges)
-        {
-            BpmChanges.Add(bpmchange);
-        }
+		CurrentBPM = Song.BPM;
+		SongLength = Chart.GetSongLength();
+		CritValue = (int)MathF.Floor(10000000f/Chart.TotalChain);
 
-        StartSong();
-    }
+		foreach(Note note in Chart.Notes)
+		{
+			Notes.Add(note);
+		}
 
-    public void StartSong()
-    {
-        if(CurrentSound.IsPlaying) CurrentSound.Stop();
-        var split = SoundName.Split('/');
-        var sound = split[split.Length - 1].Replace(".sound", "");
-        //Log.Info(sound);
-        CurrentSound = Sound.FromScreen(sound);
-        CurrentTime = Song.Offset;
-        LastTime = CurrentTime;
-        IsPlaying = true;
-    }
+		foreach(BpmChange bpmchange in Chart.BpmChanges)
+		{
+			BpmChanges.Add(bpmchange);
+		}
 
-    public void EndSong()
-    {
-        CurrentSound.Stop();
-        IsPlaying = false;
+		StartSong();
+	}
+
+	public void StartSong()
+	{
+		if(CurrentSound.IsPlaying) CurrentSound.Stop();
+
+		if (MusicStream is not null)
+		{
+			MusicStream.Play();
+		}
+		else
+		{
+			var split = SoundName.Split('/');
+			var sound = split[split.Length - 1].Replace(".sound", "");
+			//Log.Info(sound);
+			CurrentSound = Sound.FromScreen(sound);
+		}
+		CurrentTime = Song.Offset;
+		LastTime = CurrentTime;
+		IsPlaying = true;
+	}
+
+	public void EndSong()
+	{
+		if(MusicStream is not null)
+		{
+			MusicStream.Stop();
+			MusicStream = null;
+		}
+		CurrentSound.Stop();
+		IsPlaying = false;
     }
 
 

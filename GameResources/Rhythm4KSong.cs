@@ -10,6 +10,8 @@ public partial class Rhythm4KSong : GameResource
 {
     public string ChartPath { get; set; }
     public string SoundName { get; set; }
+	public string OsuId = "";
+	
     [ResourceType("png")]
     public string CoverArt { get; set; }
     public string[] LoadingTips { get; set;}
@@ -17,16 +19,9 @@ public partial class Rhythm4KSong : GameResource
     [HideInEditor] public Song Song { get; set; }
 
 
-    public static List<Rhythm4KSong> All => ResourceLibrary.GetAll<Rhythm4KSong>().ToList();
-    // {
-    //     get
-    //     {
-    //         var list = ResourceLibrary.GetAll<Rhythm4KSong>().ToList();
-    //         list.AddRange(AllRuntime);
-    //         return list;
-    //     }
-    // }
-    //public static List<Rhythm4KSong> AllRuntime = new(); 
+	public static List<Rhythm4KSong> All => AllOriginal.Concat( AllExtras ).ToList();
+	public static List<Rhythm4KSong> AllOriginal => ResourceLibrary.GetAll<Rhythm4KSong>().ToList();
+	public static List<Rhythm4KSong> AllExtras { get; set; } = new List<Rhythm4KSong>();
 
 	protected override void PostLoad()
 	{
