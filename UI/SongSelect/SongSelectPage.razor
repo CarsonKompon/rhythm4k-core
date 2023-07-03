@@ -72,6 +72,22 @@
 
 	private bool IsDirty = false;
 
+    protected override void OnAfterTreeRender(bool firstTime)
+    {
+        base.OnAfterTreeRender(firstTime);
+        
+        if(firstTime)
+        {
+            if(FileSystem.Data.DirectoryExists("beatmaps"))
+            {
+                foreach(var directory in FileSystem.Data.FindDirectory("beatmaps"))
+                {
+                    SongBuilder.LoadFromOsuFolder(directory);
+                }
+            }
+        }
+    }
+
 	public async void MountAddon(Package package)
 	{
 		await package.MountAsync(true);
