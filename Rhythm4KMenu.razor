@@ -14,6 +14,9 @@
 
 @code
 {
+
+    public Action<long> OnExit { get; set; } = delegate { };
+
     public Rhythm4KMenu()
     {
         DefaultUrl = "/";
