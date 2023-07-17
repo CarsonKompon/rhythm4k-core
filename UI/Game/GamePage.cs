@@ -412,6 +412,10 @@ public partial class GamePage
 		AudioPlayer?.Stop();
 		IsPlaying = false;
 		this.Navigate("/songs");
+        if(Ancestors.FirstOrDefault(x => x is Rhythm4KMenu) is Rhythm4KMenu menu)
+        {
+            menu.OnExit.Invoke(Score);
+        }
     }
 
     public List<Note> GetNotesToHit()

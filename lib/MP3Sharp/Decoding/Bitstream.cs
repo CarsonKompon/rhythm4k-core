@@ -178,7 +178,7 @@ namespace MP3Sharp.Decoding {
             try {
                 _SourceStream.UnRead(read);
             }
-            catch (Exception e) {
+            catch {
 				Log.Error( "Could not restore file after reading frame header.");
             }
 
@@ -409,7 +409,7 @@ namespace MP3Sharp.Decoding {
                     len -= bytesread;
                 }
             }
-            catch (IOException ex) {
+            catch {
 				Log.Error( BitstreamErrors.STREA_ERROR);
             }
         }
@@ -431,7 +431,7 @@ namespace MP3Sharp.Decoding {
                     len -= bytesread;
                 }
             }
-            catch (IOException ex) {
+            catch {
 				Log.Error( BitstreamErrors.STREA_ERROR);
             }
             return totalBytesRead;
