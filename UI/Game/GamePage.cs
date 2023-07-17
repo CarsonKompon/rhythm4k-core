@@ -409,7 +409,7 @@ public partial class GamePage
 
     public void FinishedSong()
     {
-		if ( MusicStream is not null ) MusicStream.Stop();
+		AudioPlayer?.Stop();
 		IsPlaying = false;
 		this.Navigate("/songs");
     }

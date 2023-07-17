@@ -85,7 +85,8 @@
 	public Panel MultiplayerContainer { get; set; }
 	public Panel ComboContainer { get; set; }
 	public string SoundName { get; set; }
-	public MusicStream MusicStream { get; set; }
+	public string SoundFile { get; set; }
+	public MusicPlayer AudioPlayer { get; set; }
 	public string CoverArtName { get; set; }
 
 
@@ -162,23 +163,24 @@
 
 	public void SetSong(Rhythm4KSong song, int difficulty)
 	{
-		if(MusicStream is not null)
+		if(AudioPlayer is not null)
 		{
-			MusicStream.Stop();
-			MusicStream = null;
+			AudioPlayer.Stop();
+			AudioPlayer = null;
 		}
 
 		Song = song.Song;
 		Chart = Song.Charts[difficulty];
 		SoundName = song.SoundName;
 		CoverArtName = song.CoverArt;
+		SoundFile = "";
 
 		if (song.OsuId != "")
 		{
 			string musicPath = "beatmaps/" + song.OsuId + "/" + song.Song.AudioFilename;
 			if (FileSystem.Data.FileExists(musicPath))
 			{
-				MusicStream = new MusicStream(musicPath);
+				SoundFile = musicPath;
 			}
 		}
 
@@ -217,10 +219,12 @@
 	public void StartSong()
 	{
 		if(CurrentSound.IsPlaying) CurrentSound.Stop();
+		if(AudioPlayer is not null) AudioPlayer.Stop();
 
-		if (MusicStream is not null)
+		if (!string.IsNullOrEmpty(SoundFile))
 		{
-			MusicStream.Play();
+			AudioPlayer = MusicPlayer.Play(FileSystem.Data, SoundFile);
+			AudioPlayer.Repeat = false;
 		}
 		else
 		{
@@ -236,11 +240,7 @@
 
 	public void EndSong()
 	{
-		if(MusicStream is not null)
-		{
-			MusicStream.Stop();
-			MusicStream = null;
-		}
+		AudioPlayer?.Stop();
 		CurrentSound.Stop();
 		IsPlaying = false;
     }

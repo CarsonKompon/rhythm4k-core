@@ -124,7 +124,7 @@
 	public void SetSong(Rhythm4KSong song)
 	{
         if (song == null) return;
-		if (!string.IsNullOrEmpty(song.OsuId) && song.Song.AudioFilename.EndsWith(".mp3")) return;
+		@* if (!string.IsNullOrEmpty(song.OsuId) && song.Song.AudioFilename.EndsWith(".mp3")) return; *@
 
 		Log.Info("Setting song to " + song.Song.Name);
         Difficulty = -1;

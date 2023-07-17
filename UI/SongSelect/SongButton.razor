@@ -20,12 +20,7 @@
     {
         <span class="cover">
 			<img src=@FindBackgroundImage() />
-			@if(Song.OsuId != "" && Song.Song.AudioFilename.EndsWith(".mp3"))
-			{
-				<span class="not-supported">
-					Cannot load charts that utilize MP3 files at the moment.
-				</span>
-			}
+			
 		</span>
         <div class="song-info">
             <h1>@Song.Song.Name</h1>
